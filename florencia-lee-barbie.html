@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Florencia Lee</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Florencia Lee">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#E0218A">
+    <meta name="description" content="App de lectoescritura para niños - Aprendé a leer jugando">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icon-192.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
+    
+    <!-- iOS Splash Screens -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #E0218A;
+            --primary-light: #FF69B4;
+            --secondary: #FFFFFF;
+            --accent: #00C1DE;
+            --background: #F9F9F9;
+            --text-main: #333333;
+            --text-muted: #757575;
+            --success: #4CAF50;
+            --success-bg: rgba(76, 175, 80, 0.12);
+            --error: #E91E63;
+            --error-bg: rgba(233, 30, 99, 0.1);
+            --card-shadow: 0px 4px 10px rgba(0,0,0,0.05);
+            --shadow-hover: 0px 8px 20px rgba(224, 33, 138, 0.15);
+            --radius: 12px;
+            --radius-lg: 20px;
+            --radius-pill: 50px;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            min-height: 100dvh;
+            color: var(--text-main);
+            overflow-x: hidden;
+            overflow-y: auto;
+            /* iOS safe areas */
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            padding-bottom: env(safe-area-inset-bottom, 24px);
+        }
+
+        /* ===== SCREENS ===== */
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 16px 40px;
+            border: none;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--secondary);
+            box-shadow: var(--card-shadow);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent) 0%, #00E5FF 100%);
+            color: var(--secondary);
+            box-shadow: var(--card-shadow);
+        }
+
+        .btn-accent:active {
+            transform: scale(0.97);
+        }
+
+        /* ===== HOME SCREEN ===== */
+        .home-screen {
+            gap: 20px;
+        }
+
+        .home-header {
+            text-align: center;
+            padding: 16px 0;
+        }
+
+        .home-title {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .home-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .progress-summary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 20px;
+            background: var(--secondary);
+            border-radius: var(--radius-pill);
+            box-shadow: var(--card-shadow);
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .progress-summary .star {
+            color: var(--primary);
+        }
+
+        .progress-summary .completed-count {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Rainbow Progress Bar */
+        .rainbow-progress-container {
+            width: 100%;
+            margin-top: 16px;
+            padding: 0 10px;
+        }
+
+        .rainbow-bar {
+            height: 16px;
+            background: #E0E0E0;
+            border-radius: var(--radius-pill);
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .rainbow-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(
+                90deg,
+                #FF0000 0%,
+                #FF8000 14%,
+                #FFFF00 28%,
+                #00FF00 42%,
+                #00FFFF 57%,
+                #0080FF 71%,
+                #8000FF 85%,
+                #FF00FF 100%
+            );
+            border-radius: var(--radius-pill);
+            transition: width 0.6s ease-in-out;
+            position: relative;
+        }
+
+        .rainbow-fill::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 8px;
+            right: 8px;
+            height: 5px;
+            background: rgba(255,255,255,0.35);
+            border-radius: 3px;
+        }
+
+        .rainbow-fill.complete {
+            animation: rainbowPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes rainbowPulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.15); }
+        }
+
+        .rainbow-label {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .rainbow-label.complete {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .word-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            padding-bottom: 24px;
+        }
+
+        .word-card {
+            background: var(--secondary);
+            border-radius: var(--radius-lg);
+            padding: 20px 12px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .word-card:active {
+            transform: scale(1.03);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .word-card.completed {
+            border-color: var(--success);
+        }
+
+        .word-card.completed::after {
+            content: '✓';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 28px;
+            height: 28px;
+            background: var(--success);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: var(--card-shadow);
+        }
+
+        .card-emoji {
+            font-size: 3rem;
+            line-height: 1;
+        }
+
+        .card-word {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* ===== EXERCISE SCREEN ===== */
+        .exercise-screen {
+            gap: 12px;
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .back-btn {
+            background: var(--secondary);
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 1.4rem;
+            cursor: pointer;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 10px;
+            background: var(--secondary);
+            border-radius: var(--radius-pill);
+            margin: 0 16px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: var(--radius-pill);
+            transition: width 0.4s ease-in-out;
+        }
+
+        .exercise-title {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--secondary);
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            box-shadow: var(--card-shadow);
+        }
+
+        .exercise-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            padding-bottom: 24px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ===== WORD BUILD ===== */
+        .word-build-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            padding: 16px;
+        }
+
+        .word-image {
+            background: linear-gradient(145deg, #FFF0F5 0%, #FFE4EC 100%);
+            border-radius: var(--radius-lg);
+            padding: 32px 48px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .big-emoji {
+            font-size: 5.5rem;
+            line-height: 1;
+        }
+
+        .task-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--accent) 0%, #00E5FF 100%);
+            border: none;
+            padding: 14px 32px;
+            border-radius: var(--radius-pill);
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--secondary);
+            cursor: pointer;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .task-btn:active {
+            transform: scale(0.97);
+        }
+
+        .task-btn .icon {
+            font-size: 1.3rem;
+        }
+
+        .word-slots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 100%;
+        }
+
+        .word-slot {
+            width: 44px;
+            height: 56px;
+            background: var(--secondary);
+            border: 2px dashed #E0E0E0;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            transition: all 0.3s ease-in-out;
+            box-shadow: var(--card-shadow);
+        }
+
+        .word-slot.active {
+            border-color: var(--accent);
+            border-style: solid;
+            background: rgba(0, 193, 222, 0.08);
+            animation: slotPulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes slotPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 193, 222, 0.3); }
+            50% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(0, 193, 222, 0); }
+        }
+
+        .word-slot.filled {
+            border-style: solid;
+        }
+
+        .word-slot.correct {
+            border-color: var(--success);
+            background: var(--success-bg);
+            animation: correctPop 0.4s ease;
+        }
+
+        @keyframes correctPop {
+            0%, 100% { transform: scale(1); }
+            40% { transform: scale(1.12); }
+            70% { transform: scale(0.95); }
+        }
+
+        .letter-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            max-width: 360px;
+            padding: 20px;
+            background: var(--secondary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--card-shadow);
+        }
+
+        .bank-letter {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(145deg, #FFF0F5 0%, #FFFFFF 100%);
+            border: 2px solid var(--primary-light);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .bank-letter:active {
+            transform: scale(0.95);
+        }
+
+        .bank-letter.used {
+            opacity: 0.2;
+            pointer-events: none;
+            transform: scale(0.9);
+        }
+
+        .bank-letter.correct-letter {
+            border-color: var(--success);
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .bank-letter.wrong-letter {
+            border-color: var(--error);
+            background: var(--error-bg);
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* ===== SUCCESS SCREEN ===== */
+        .success-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            gap: 28px;
+            padding: 20px;
+        }
+
+        .success-stars {
+            font-size: 3.5rem;
+            animation: starsFloat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes starsFloat {
+            0%, 100% { transform: translateY(0) rotate(-3deg); }
+            50% { transform: translateY(-12px) rotate(3deg); }
+        }
+
+        .success-title {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .success-word {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--secondary);
+            padding: 18px 40px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .success-message {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            animation: iconBounce 0.6s ease;
+        }
+
+        @keyframes iconBounce {
+            0% { transform: scale(0) rotate(-15deg); }
+            60% { transform: scale(1.15) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        /* ===== MINI FEEDBACK ===== */
+        .mini-feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            z-index: 50;
+            animation: miniFeedbackPop 0.6s ease-in-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes miniFeedbackPop {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+            100% { opacity: 0; transform: translate(-50%, -70%) scale(1); }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            animation: confettiFall 1.3s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Responsive - Desktop */
+        @media (min-width: 500px) {
+            .word-cards { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* Responsive - Small phones */
+        @media (max-width: 360px) {
+            .card-emoji { font-size: 2.5rem; }
+            .card-word { font-size: 0.9rem; }
+            .word-slot { width: 38px; height: 48px; font-size: 1.5rem; }
+            .bank-letter { width: 44px; height: 44px; font-size: 1.4rem; }
+            .big-emoji { font-size: 4.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- Home Screen -->
+        <div class="screen home-screen active" id="homeScreen">
+            <div class="home-header">
+                <h1 class="home-title">¡Hola Florencia! 💖</h1>
+                <p class="home-subtitle">Tocá una palabra para armarla</p>
+                <div class="rainbow-progress-container">
+                    <div class="rainbow-bar">
+                        <div class="rainbow-fill" id="rainbowFill"></div>
+                    </div>
+                    <div class="rainbow-label" id="rainbowLabel">
+                        <span id="completedCount">0</span> de <span id="totalCount">21</span> palabras 🌈
+                    </div>
+                </div>
+            </div>
+            
+            <div class="word-cards" id="wordCards">
+                <!-- Cards generadas dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Exercise Screen -->
+        <div class="screen exercise-screen" id="exerciseScreen">
+            <div class="exercise-header">
+                <button class="back-btn" onclick="goHome()">←</button>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <span class="exercise-title" id="exerciseTitle">MAMÁ</span>
+            </div>
+            
+            <div class="exercise-content" id="exerciseContent">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+
+        <!-- Success Screen -->
+        <div class="screen success-screen" id="successScreen">
+            <div class="success-stars">💖✨💖</div>
+            <h2 class="success-title">¡Muy bien!</h2>
+            <div class="success-icon">🎀</div>
+            <div class="success-word" id="successWord">MAMÁ</div>
+            <p class="success-message">¡Armaste la palabra!</p>
+            <button class="btn btn-primary" onclick="goHome()">
+                ¡Seguir jugando! 💫
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // ===== VOZ DE MAESTRA ARGENTINA =====
+        let maestraVoice = null;
+        let voicesLoaded = false;
+        
+        function initSam() {
+            if ('speechSynthesis' in window) {
+                loadVoices();
+                speechSynthesis.onvoiceschanged = loadVoices;
+                setTimeout(loadVoices, 100);
+                setTimeout(loadVoices, 500);
+                setTimeout(loadVoices, 1000);
+            }
+        }
+        
+        function loadVoices() {
+            const voices = speechSynthesis.getVoices();
+            if (voices.length === 0) return;
+            if (voicesLoaded) return;
+            voicesLoaded = true;
+            
+            console.log('=== VOCES DISPONIBLES ===');
+            voices.forEach((v, i) => console.log(i, v.name, v.lang));
+            
+            // Nombres femeninos conocidos en diferentes sistemas
+            const femaleNames = [
+                // iOS/macOS español
+                'mónica', 'monica', 'paulina', 'lucia', 'lucía', 'marisol',
+                // Google TTS
+                'google español',
+                // Windows español
+                'helena', 'laura', 'sabina', 'helia',
+                // Samsung
+                'female', 'mujer', 'femenin',
+                // Otros
+                'carmen', 'elena', 'marta', 'rosa', 'ana', 'maria', 'maría',
+                'conchita', 'lupe', 'penelope', 'penélope'
+            ];
+            
+            // Nombres masculinos a evitar
+            const maleNames = [
+                'jorge', 'diego', 'pablo', 'carlos', 'miguel', 'juan', 
+                'pedro', 'andrés', 'andres', 'luis', 'male', 'hombre',
+                'enrique', 'rodrigo'
+            ];
+            
+            // Filtrar voces en español
+            const spanishVoices = voices.filter(v => 
+                v.lang.startsWith('es') || 
+                v.lang.includes('Spanish') ||
+                v.name.toLowerCase().includes('spanish') ||
+                v.name.toLowerCase().includes('español')
+            );
+            
+            console.log('Voces en español:', spanishVoices.map(v => v.name + ' (' + v.lang + ')'));
+            
+            // Función para detectar si es voz femenina
+            function isFemaleVoice(voice) {
+                const name = voice.name.toLowerCase();
+                // Si tiene nombre femenino conocido
+                if (femaleNames.some(fn => name.includes(fn))) return true;
+                // Si tiene nombre masculino conocido
+                if (maleNames.some(mn => name.includes(mn))) return false;
+                // Por defecto, asumir que voces sin género específico pueden ser femeninas
+                return null;
+            }
+            
+            // Buscar en este orden de prioridad:
+            let selected = null;
+            
+            // 1. Voz femenina en español argentino
+            selected = spanishVoices.find(v => v.lang.includes('AR') && isFemaleVoice(v) === true);
+            
+            // 2. Cualquier voz femenina en español latinoamericano
+            if (!selected) {
+                selected = spanishVoices.find(v => 
+                    (v.lang.includes('419') || v.lang.includes('MX') || v.lang.includes('US') || v.lang.includes('AR')) && 
+                    isFemaleVoice(v) === true
+                );
+            }
+            
+            // 3. Cualquier voz femenina en español
+            if (!selected) {
+                selected = spanishVoices.find(v => isFemaleVoice(v) === true);
+            }
+            
+            // 4. Voz en español que NO sea masculina
+            if (!selected) {
+                selected = spanishVoices.find(v => isFemaleVoice(v) !== false);
+            }
+            
+            // 5. Cualquier voz en español (último recurso)
+            if (!selected && spanishVoices.length > 0) {
+                selected = spanishVoices[0];
+            }
+            
+            // 6. Cualquier voz femenina en cualquier idioma
+            if (!selected) {
+                selected = voices.find(v => isFemaleVoice(v) === true);
+            }
+            
+            // 7. Primera voz disponible
+            if (!selected) {
+                selected = voices[0];
+            }
+            
+            maestraVoice = selected;
+            console.log('✓ VOZ SELECCIONADA:', selected.name, selected.lang);
+        }
+
+        function speakRobot(text) {
+            if (!('speechSynthesis' in window)) return;
+            
+            const synth = window.speechSynthesis;
+            synth.cancel();
+            
+            if (!voicesLoaded) loadVoices();
+            
+            // Procesar el texto para que las letras se lean correctamente
+            let processedText = text;
+            
+            // Si es una sola letra, convertir a minúscula para que no diga "mayúscula"
+            if (text.length === 1) {
+                processedText = text.toLowerCase();
+            } 
+            // Si es una palabra corta en mayúsculas, convertir a minúsculas
+            else if (text === text.toUpperCase() && text.length <= 10) {
+                processedText = text.toLowerCase();
+            }
+            
+            // Reemplazar letras con tilde por su sonido
+            processedText = processedText
+                .replace(/á/gi, 'a')
+                .replace(/é/gi, 'e')
+                .replace(/í/gi, 'i')
+                .replace(/ó/gi, 'o')
+                .replace(/ú/gi, 'u')
+                .replace(/ü/gi, 'u');
+            
+            const utterance = new SpeechSynthesisUtterance(processedText);
+            utterance.lang = 'es-AR';
+            utterance.rate = 0.85;
+            utterance.pitch = 1.2;
+            utterance.volume = 1.0;
+            
+            if (maestraVoice) {
+                utterance.voice = maestraVoice;
+            }
+            
+            synth.speak(utterance);
+        }
+
+        // ===== WORDS DATA =====
+        const wordsList = [
+            { id: 'mama', word: 'MAMÁ', emoji: '👩‍👧', letters: ['M','A','M','Á'], extra: ['O','E','P','S'] },
+            { id: 'papa', word: 'PAPÁ', emoji: '👨‍👧', letters: ['P','A','P','Á'], extra: ['O','E','M','S'] },
+            { id: 'perro', word: 'PERRO', emoji: '🐶', letters: ['P','E','R','R','O'], extra: ['A','S','T','L'] },
+            { id: 'tia', word: 'TÍA', emoji: '👩', letters: ['T','Í','A'], extra: ['O','E','S','M'] },
+            { id: 'escuela', word: 'ESCUELA', emoji: '🏫', letters: ['E','S','C','U','E','L','A'], extra: ['O','I','R'] },
+            { id: 'agua', word: 'AGUA', emoji: '💧', letters: ['A','G','U','A'], extra: ['O','E','S','I'] },
+            { id: 'verduras', word: 'VERDURAS', emoji: '🥦', letters: ['V','E','R','D','U','R','A','S'], extra: ['O','I'] },
+            { id: 'banana', word: 'BANANA', emoji: '🍌', letters: ['B','A','N','A','N','A'], extra: ['O','E','S'] },
+            { id: 'yogurt', word: 'YOGURT', emoji: '🥛', letters: ['Y','O','G','U','R','T'], extra: ['A','E','S'] },
+            { id: 'seno', word: 'SEÑO', emoji: '👩‍🏫', letters: ['S','E','Ñ','O'], extra: ['A','I','U','M'] },
+            { id: 'abuela', word: 'ABUELA', emoji: '👵', letters: ['A','B','U','E','L','A'], extra: ['O','I','S'] },
+            { id: 'abuelo', word: 'ABUELO', emoji: '👴', letters: ['A','B','U','E','L','O'], extra: ['I','S','A'] },
+            { id: 'gato', word: 'GATO', emoji: '🐱', letters: ['G','A','T','O'], extra: ['E','I','S','U'] },
+            { id: 'rata', word: 'RATA', emoji: '🐀', letters: ['R','A','T','A'], extra: ['O','E','S','I'] },
+            { id: 'remera', word: 'REMERA', emoji: '👕', letters: ['R','E','M','E','R','A'], extra: ['O','I','S'] },
+            { id: 'vestido', word: 'VESTIDO', emoji: '👗', letters: ['V','E','S','T','I','D','O'], extra: ['A','U'] },
+            { id: 'lapiz', word: 'LÁPIZ', emoji: '✏️', letters: ['L','Á','P','I','Z'], extra: ['O','E','S','A'] },
+            { id: 'papel', word: 'PAPEL', emoji: '📄', letters: ['P','A','P','E','L'], extra: ['O','I','S','U'] },
+            { id: 'mochila', word: 'MOCHILA', emoji: '🎒', letters: ['M','O','C','H','I','L','A'], extra: ['E','S'] },
+            { id: 'bebe', word: 'BEBÉ', emoji: '👶', letters: ['B','E','B','É'], extra: ['A','O','I','S'] },
+            { id: 'auto', word: 'AUTO', emoji: '🚗', letters: ['A','U','T','O'], extra: ['E','I','S','P'] }
+        ];
+
+        // ===== GAME STATE =====
+        let gameState = {
+            completedWords: [],
+            currentWord: null
+        };
+
+        // ===== PERSISTENCE =====
+        function saveGame() {
+            localStorage.setItem('florenciaLeeBarbie', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('florenciaLeeBarbie');
+            if (saved) {
+                gameState = { ...gameState, ...JSON.parse(saved) };
+            }
+        }
+
+        // ===== SCREEN MANAGEMENT =====
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goHome() {
+            renderWordCards();
+            showScreen('homeScreen');
+        }
+
+        // ===== HOME SCREEN =====
+        function renderWordCards() {
+            const container = document.getElementById('wordCards');
+            const completed = gameState.completedWords.length;
+            const total = wordsList.length;
+            
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+            
+            // Actualizar barra arcoíris
+            const percentage = (completed / total) * 100;
+            const rainbowFill = document.getElementById('rainbowFill');
+            const rainbowLabel = document.getElementById('rainbowLabel');
+            
+            rainbowFill.style.width = percentage + '%';
+            
+            if (completed === total) {
+                rainbowFill.classList.add('complete');
+                rainbowLabel.classList.add('complete');
+                rainbowLabel.innerHTML = '🌈 ¡Completaste todas las palabras! 🎉';
+            } else {
+                rainbowFill.classList.remove('complete');
+                rainbowLabel.classList.remove('complete');
+                rainbowLabel.innerHTML = `<span id="completedCount">${completed}</span> de <span id="totalCount">${total}</span> palabras 🌈`;
+            }
+            
+            container.innerHTML = wordsList.map(w => {
+                const isCompleted = gameState.completedWords.includes(w.id);
+                return `
+                    <div class="word-card ${isCompleted ? 'completed' : ''}" onclick="startWord('${w.id}')">
+                        <span class="card-emoji">${w.emoji}</span>
+                        <span class="card-word">${w.word}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== EXERCISE =====
+        function startWord(wordId) {
+            const word = wordsList.find(w => w.id === wordId);
+            if (!word) return;
+            
+            gameState.currentWord = word;
+            document.getElementById('exerciseTitle').textContent = word.word;
+            updateProgress(0);
+            
+            showScreen('exerciseScreen');
+            renderWordBuild(word);
+        }
+
+        function renderWordBuild(word) {
+            window.currentSlot = 0;
+            window.targetWord = word.letters;
+            window.currentWordLabel = word.word;
+            
+            const allLetters = [...word.letters, ...word.extra];
+            const shuffled = allLetters.sort(() => Math.random() - 0.5);
+            
+            const container = document.getElementById('exerciseContent');
+            container.innerHTML = `
+                <div class="word-build-container">
+                    <div class="word-image">
+                        <span class="big-emoji">${word.emoji}</span>
+                    </div>
+                    <button class="task-btn" onclick="speakTask()">
+                        <span class="icon">📢</span>
+                        Tarea
+                    </button>
+                    <div class="word-slots" id="wordSlots">
+                        ${word.letters.map((letter, i) => `
+                            <div class="word-slot ${i === 0 ? 'active' : ''}" data-index="${i}" data-expected="${letter}">
+                                <span class="slot-letter"></span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="letter-bank" id="letterBank">
+                        ${shuffled.map((letter, i) => `
+                            <button class="bank-letter" data-letter="${letter}" data-id="${i}" onclick="selectLetter(this, '${letter}')">
+                                ${letter}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => speakRobot(`Armá la palabra. ${word.word}`), 400);
+        }
+
+        function speakTask() {
+            speakRobot(`Armá la palabra. ${window.currentWordLabel}`);
+        }
+
+        function selectLetter(btn, letter) {
+            if (btn.classList.contains('used')) return;
+            
+            const slots = document.querySelectorAll('.word-slot');
+            const currentSlotEl = slots[window.currentSlot];
+            const expectedLetter = currentSlotEl.dataset.expected;
+            
+            const normalize = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            
+            if (normalize(letter) === normalize(expectedLetter)) {
+                currentSlotEl.querySelector('.slot-letter').textContent = expectedLetter;
+                currentSlotEl.classList.remove('active');
+                currentSlotEl.classList.add('filled', 'correct');
+                btn.classList.add('used', 'correct-letter');
+                
+                showMiniFeedback(true);
+                speakRobot(expectedLetter);
+                
+                window.currentSlot++;
+                updateProgress((window.currentSlot / window.targetWord.length) * 100);
+                
+                if (window.currentSlot >= window.targetWord.length) {
+                    setTimeout(() => {
+                        speakRobot(window.currentWordLabel);
+                        setTimeout(() => completeWord(), 800);
+                    }, 400);
+                } else {
+                    slots[window.currentSlot].classList.add('active');
+                }
+            } else {
+                btn.classList.add('wrong-letter');
+                showMiniFeedback(false);
+                speakRobot('Esa no');
+                setTimeout(() => btn.classList.remove('wrong-letter'), 500);
+            }
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+
+        function completeWord() {
+            const word = gameState.currentWord;
+            
+            if (!gameState.completedWords.includes(word.id)) {
+                gameState.completedWords.push(word.id);
+                saveGame();
+            }
+            
+            document.getElementById('successWord').textContent = word.word;
+            showScreen('successScreen');
+            createConfetti();
+            setTimeout(() => speakRobot('Muy bien! Ahora completá otra palabra'), 300);
+        }
+
+        // ===== FEEDBACK =====
+        function showMiniFeedback(isCorrect) {
+            const emoji = isCorrect ? '✨' : '💔';
+            const div = document.createElement('div');
+            div.className = 'mini-feedback';
+            div.textContent = emoji;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 600);
+        }
+
+        // ===== CONFETTI =====
+        function createConfetti() {
+            const colors = ['#E0218A', '#FF69B4', '#00C1DE', '#FFD700', '#FF6B9D', '#00E5FF'];
+            const container = document.createElement('div');
+            container.className = 'confetti';
+            document.body.appendChild(container);
+
+            for (let i = 0; i < 50; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + 'vw';
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.animationDelay = Math.random() * 0.5 + 's';
+                piece.style.animationDuration = (Math.random() * 1 + 1.2) + 's';
+                piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                container.appendChild(piece);
+            }
+
+            setTimeout(() => container.remove(), 2500);
+        }
+
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', () => {
+            initSam();
+            loadGame();
+            renderWordCards();
+            
+            // Registrar Service Worker para PWA
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registrado'))
+                    .catch(err => console.log('Service Worker no registrado:', err));
+            }
+        });
+    </script>
+</body>
+</html>
